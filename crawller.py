@@ -27,7 +27,7 @@ def getCourseTime(encryptedCourseId): # 通过课程加密名称获取已选课�
 	
 	i = 0
 	while(i < len(classes)):
-		if(classes[i]['selectedFlag'] == True):
+		if(classes[i]['selectedFlag'] == True): # 找到选课
 			return classes[i]
 		i += 1
 
@@ -120,7 +120,7 @@ if __name__ == '__main__':
 		classTimejson = json.load(jsonfile)
 
 
-	while(flag < 5):
+	while(flag < 5): # 主修、体育、英语、通识、非限
 		i = 0
 		while(i < len(courses['data'][flag]['courseVOList'])):
 			if(courses['data'][flag]['courseVOList'][i]['courseEnrollSign'] == '已选'):
