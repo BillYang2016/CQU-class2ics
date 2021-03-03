@@ -1,8 +1,7 @@
 # coding: utf-8
-#!/usr/bin/python
+# !/usr/bin/python
 
 import sys
-import json
 import xlrd
 
 __author__ = 'Xiejiadong'
@@ -26,14 +25,15 @@ _colOfWeeks = 4
 _colOfClassTime = 5
 _colOfClassroom = 6
 
+
 def main():
 	# 读取 excel 文件
 	data = xlrd.open_workbook(sys.path[0] + '/classInfo.xls')
 	table = data.sheets()[0]
 	# print table.cell(1,0).value
 	# 基础信息
-	numOfRow = table.nrows  #获取行数,即课程数
-	numOfCol = table.ncols  #获取列数,即信息量
+	numOfRow = table.nrows  # 获取行数,即课程数
+	numOfCol = table.ncols  # 获取列数,即信息量
 	headStr = '{\n"classInfo":[\n'
 	tailStr = ']\n}'
 	classInfoStr = ''
@@ -57,19 +57,16 @@ def main():
 	info += "Weeks: " + str(_colOfWeeks) + "列\n"
 	info += "ClassTime: " + str(_colOfClassTime) + "列\n"
 	info += "Classroom: " + str(_colOfClassroom) + "列\n"
-	print (info)
+	print(info)
 	# info += "输入 0 继续，输入 1 退出："
 	option = input("输入 y 继续，输入其他内容退出：")
 	if option != "y":
 		sys.exit(0)
-	
 
 	# 开始操作
 	# 将信息加载到列表
 	i = 1
-	while i < numOfRow :
-		index = i-1
-
+	while i < numOfRow:
 		classNameList.append(((table.cell(i, _colOfClassName).value)))
 		startWeekList.append(str(int((table.cell(i, _colOfStartWeek).value))))
 		endWeekList.append(str(int((table.cell(i, _colOfEndWeek).value))))
@@ -95,15 +92,16 @@ def main():
 		itemClassInfoStr += '"classroom":"' + classroomList[i] + '"\n'
 		itemClassInfoStr += itemTailStr
 		classInfoStr += itemClassInfoStr
-		if i!=len(classNameList)-1 :
+		if i != len(classNameList)-1:
 			classInfoStr += ","
 		i += 1
 	classInfoStr += tailStr
 	# print classInfoStr
-	with open(sys.path[0] + '/conf_classInfo.json','w') as f:
+	with open(sys.path[0] + '/conf_classInfo.json', 'w') as f:
 
 		f.write(classInfoStr)
 		f.close()
 	print("\nALL DONE !")
+
 
 main()

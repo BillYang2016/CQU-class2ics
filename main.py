@@ -1,8 +1,9 @@
 # coding: utf-8
-#!/usr/bin/python
+# !/usr/bin/python
 
 import sys
-import time, datetime
+import time
+import datetime
 import json
 from random import Random
 
@@ -26,25 +27,26 @@ DONE_ALARMUID = ""
 classTimeList = []
 classInfoList = []
 
+
 def start():
-	
-	basicSetting();
-	uniteSetting();
-	classInfoHandle();
-	icsCreateAndSave();
+	basicSetting()
+	uniteSetting()
+	classInfoHandle()
+	icsCreateAndSave()
 	print('课程表已保存至脚本目录下的 class.ics 中，你现在可以导入了：）')
 
 
 def save(string):
-     f = open(sys.path[0] + "/class.ics", 'wb')
-     f.write(string.encode("utf-8"))
-     f.close()
+	f = open(sys.path[0] + "/class.ics", 'wb')
+	f.write(string.encode("utf-8"))
+	f.close()
+
 
 def icsCreateAndSave():
 	icsString = "BEGIN:VCALENDAR\nMETHOD:PUBLISH\nVERSION:2.0\nX-WR-CALNAME:课程表\nPRODID:-//Apple Inc.//Mac OS X 10.12//EN\nX-APPLE-CALENDAR-COLOR:#FC4208\nX-WR-TIMEZONE:Asia/Shanghai\nCALSCALE:GREGORIAN\nBEGIN:VTIMEZONE\nTZID:Asia/Shanghai\nBEGIN:STANDARD\nTZOFFSETFROM:+0900\nRRULE:FREQ=YEARLY;UNTIL=19910914T150000Z;BYMONTH=9;BYDAY=3SU\nDTSTART:19890917T000000\nTZNAME:GMT+8\nTZOFFSETTO:+0800\nEND:STANDARD\nBEGIN:DAYLIGHT\nTZOFFSETFROM:+0800\nDTSTART:19910414T000000\nTZNAME:GMT+8\nTZOFFSETTO:+0900\nRDATE:19910414T000000\nEND:DAYLIGHT\nEND:VTIMEZONE\n"
 	global classTimeList, DONE_ALARMUID, DONE_UnitUID
 	eventString = ""
-	for classInfo in classInfoList :
+	for classInfo in classInfoList:
 		i = int(classInfo["classTime"]-1)
 		# className = classInfo["className"]+"|"+classTimeList[i]["name"]+"|"+classInfo["classroom"]
 		className = classInfo["className"]
@@ -74,12 +76,13 @@ def icsCreateAndSave():
 	save(icsString)
 	print("Now running: icsCreateAndSave()")
 
+
 def classInfoHandle():
 	global classInfoList
 	global DONE_firstWeekDate
 	i = 0
 
-	for classInfo in classInfoList :
+	for classInfo in classInfoList:
 		# 具体日期计算出来
 
 		startWeek = json.dumps(classInfo["week"]["startWeek"])
@@ -87,34 +90,37 @@ def classInfoHandle():
 		weekday = float(json.dumps(classInfo["weekday"]))
 		week = float(json.dumps(classInfo["weeks"]))
 		dateLength = float((int(startWeek) - 1) * 7)
-		startDate = datetime.datetime.fromtimestamp(int(time.mktime(DONE_firstWeekDate))) + datetime.timedelta(days = dateLength + weekday - 1)
+		startDate = datetime.datetime.fromtimestamp(int(time.mktime(DONE_firstWeekDate))) + datetime.timedelta(days=dateLength + weekday - 1)
 		string = startDate.strftime('%Y%m%d')
 
 		dateLength = float((int(endWeek) - 1) * 7)
-		endDate = datetime.datetime.fromtimestamp(int(time.mktime(DONE_firstWeekDate))) + datetime.timedelta(days = dateLength + weekday - 1)
+		endDate = datetime.datetime.fromtimestamp(int(time.mktime(DONE_firstWeekDate))) + datetime.timedelta(days=dateLength + weekday - 1)
 		
 		date = startDate
 		dateList = []
-		if (week == 3): dateList.append(string)
-		if ((week == 2) and (int(startWeek)%2==0)): dateList.append(string)
-		if ((week == 1) and (int(startWeek)%2==1)): dateList.append(string)
+		if (week == 3):
+			dateList.append(string)
+		if ((week == 2) and (int(startWeek) % 2 == 0)):
+			dateList.append(string)
+		if ((week == 1) and (int(startWeek) % 2 == 1)):
+			dateList.append(string)
 		i = NO
 		w = int(startWeek)+1
 		while (i):
-			date = date + datetime.timedelta(days = 7.0)
+			date = date + datetime.timedelta(days=7.0)
 			if(date > endDate):
 				i = YES
 				break
 			if(week == 3):
 				string = date.strftime('%Y%m%d')
 				dateList.append(string)
-			if ((week == 1) and (w%2 == 1)):
+			if ((week == 1) and (w % 2 == 1)):
 				string = date.strftime('%Y%m%d')
 				dateList.append(string)
-			if ((week == 2) and (w%2 == 0)):
+			if ((week == 2) and (w % 2 == 0)):
 				string = date.strftime('%Y%m%d')
 				dateList.append(string)
-			w=w+1
+			w = w+1
 		classInfo["date"] = dateList
 
 		# 设置 UID
@@ -123,10 +129,11 @@ def classInfoHandle():
 		classInfo["CREATED"] = DONE_CreatedTime
 		classInfo["DTSTAMP"] = DONE_CreatedTime
 		UID_List = []
-		for date  in dateList:
+		for date in dateList:
 			UID_List.append(UID_Create())
 		classInfo["UID"] = UID_List
 	print("Now running: classInfoHandle()")
+
 
 def UID_Create():
 	return random_str(20) + "&xiejiadong.com"
@@ -143,6 +150,7 @@ def CreateTime():
 
 	print("Now running: CreateTime()")
 
+
 def uniteSetting():
 	# 
 	global DONE_ALARMUID
@@ -152,6 +160,7 @@ def uniteSetting():
 	DONE_UnitUID = random_str(20) + "&xiejiadong.com"
 	print("Now running: uniteSetting()")
 
+
 def setClassTime():
 	data = []
 	with open(sys.path[0] + '/conf_classTime.json', 'r', encoding='UTF-8') as f:
@@ -159,7 +168,8 @@ def setClassTime():
 	global classTimeList
 	classTimeList = data["classTime"]
 	print("Now running: setclassTime()")
-	
+
+
 def setClassInfo():
 	data = []
 	with open(sys.path[0] + '/conf_classInfo.json', 'r') as f:
@@ -168,10 +178,12 @@ def setClassInfo():
 	classInfoList = data["classInfo"]
 	print("Now running: setClassInfo()")
 
+
 def setFirstWeekDate(firstWeekDate):
 	global DONE_firstWeekDate
 	DONE_firstWeekDate = time.strptime(firstWeekDate,'%Y%m%d')
 	print("Now running: setFirstWeekDate():", DONE_firstWeekDate)
+
 
 def setReminder(reminder):
 	global DONE_reminder
@@ -192,6 +204,7 @@ def setReminder(reminder):
 
 	print("setReminder",reminder)
 
+
 def checkReminder(reminder):
 	# TODO
 
@@ -201,6 +214,7 @@ def checkReminder(reminder):
 		if (reminder == num):
 			return YES
 	return NO
+
 
 def checkFirstWeekDate(firstWeekDate):
 	# 长度判断
@@ -224,6 +238,7 @@ def checkFirstWeekDate(firstWeekDate):
 
 	print("Now running: checkFirstWeekDate():", firstWeekDate)
 	return YES
+
 
 def basicSetting():
 	info = "欢迎使用课程表生成工具。\n接下来你需要设置一些基础的信息方便生成数据\n"
@@ -252,6 +267,8 @@ def basicSetting():
 	info = "正在配置提醒功能，请输入数字选择提醒时间:\n[0] 不提醒\n[1] 上课前 10 分钟提醒\n[2] 上课前 15 分钟提醒\n[3] 上课前 30 分钟提醒\n[4] 上课前 1 小时提醒\n[5] 上课前 1 天提醒\n"
 	reminder = input(info)
 	checkInput(checkReminder, reminder)
+
+
 def checkInput(checkType, input):
 	if(checkType == checkFirstWeekDate):
 		if (checkFirstWeekDate(input)):
@@ -271,6 +288,7 @@ def checkInput(checkType, input):
 	else:
 		print("程序出错了……")
 
+
 def random_str(randomlength):
     str = ''
     chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
@@ -279,9 +297,12 @@ def random_str(randomlength):
     for i in range(randomlength):
         str+=chars[random.randint(0, length)]
     return str
+
+
 def sys_exit():
 	print("配置文件错误，请检查。\n")
 	sys.exit(0)
+
 
 if __name__ == '__main__':
 	start()
