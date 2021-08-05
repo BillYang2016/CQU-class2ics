@@ -88,7 +88,6 @@ def classInfoHandle():
 		startWeek = json.dumps(classInfo["week"]["startWeek"])
 		endWeek = json.dumps(classInfo["week"]["endWeek"])
 		weekday = float(json.dumps(classInfo["weekday"]))
-		week = float(json.dumps(classInfo["weeks"]))
 		dateLength = float((int(startWeek) - 1) * 7)
 		startDate = datetime.datetime.fromtimestamp(int(time.mktime(DONE_firstWeekDate))) + datetime.timedelta(days=dateLength + weekday - 1)
 		string = startDate.strftime('%Y%m%d')
@@ -98,12 +97,8 @@ def classInfoHandle():
 		
 		date = startDate
 		dateList = []
-		if (week == 3):
-			dateList.append(string)
-		if ((week == 2) and (int(startWeek) % 2 == 0)):
-			dateList.append(string)
-		if ((week == 1) and (int(startWeek) % 2 == 1)):
-			dateList.append(string)
+		dateList.append(string)
+			
 		i = NO
 		w = int(startWeek)+1
 		while (i):
@@ -111,15 +106,8 @@ def classInfoHandle():
 			if(date > endDate):
 				i = YES
 				break
-			if(week == 3):
-				string = date.strftime('%Y%m%d')
-				dateList.append(string)
-			if ((week == 1) and (w % 2 == 1)):
-				string = date.strftime('%Y%m%d')
-				dateList.append(string)
-			if ((week == 2) and (w % 2 == 0)):
-				string = date.strftime('%Y%m%d')
-				dateList.append(string)
+			string = date.strftime('%Y%m%d')
+			dateList.append(string)
 			w = w+1
 		classInfo["date"] = dateList
 

@@ -4,7 +4,6 @@
 import sys
 import requests
 import json
-import xlwt
 
 stuid = '' # 请填入学号
 
@@ -35,16 +34,15 @@ def getCourseTime(encryptedCourseId):  # 通过课程加密名称获取已选课
 		i += 1
 
 
-def printExcel(courseName, instructorName, courseDetails):
+def printJson(courseName, instructorName, courseDetails):
 	dic1 = {'一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '日': 7}
 	timestr = courseDetails['teachingWeekFormat']
 	times = timestr.split(',')
 
-	global f, sheet1, row, classTimejson, errors
+	global classTimejson, errors, classInfoArray
 
 	i = 0
 	while(i < len(times)):  # 对于每个课程时间单独处理
-		row += 1
 		if(times[i].find('-') != -1):
 			startWeek = times[i].partition('-')[0]
 			endWeek = times[i].partition('-')[2]
@@ -66,22 +64,21 @@ def printExcel(courseName, instructorName, courseDetails):
 		else:
 			classTime += 1
 
-		sheet1.write(row, 0, courseName + ' ' + instructorName)  # 课程名 + 导师名
-		sheet1.write(row, 1, startWeek)  # 开始周
-		sheet1.write(row, 2, endWeek)  # 结束周
-		sheet1.write(row, 3, weekday)  # 周几
-		sheet1.write(row, 4, 3)  # 单数双数周（暂无用）
-		sheet1.write(row, 5, classTime)  # 上课时间
-		sheet1.write(row, 6, classroom)  # 教室
+		timeMap = {}
+		timeMap['startWeek'] = int(startWeek)
+		timeMap['endWeek'] = int(endWeek)
+
+		classMap = {}
+		classMap['className'] =  courseName + ' ' + instructorName  # 课程名 + 导师名
+		classMap['week'] = timeMap  # 开始结束周
+		classMap['weekday'] = weekday  # 周几
+		classMap['classTime'] = classTime  # 上课时间
+		classMap['classroom'] = classroom  # 教室
+		# sheet1.write(row, 4, 3)  # 单数双数周（暂无用）
+		
+		classInfoArray.append(classMap)
 
 		i += 1
-
-
-def processDetails(courseDetails):
-	
-	if courseDetails['childrenList'] is not None:  # 有实验课
-		print('课程包含实验课，正在处理实验课信息')
-		printExcel(courseName+'实验', courseDetails['childrenList'][0])
 
 
 if __name__ == '__main__':
@@ -90,14 +87,9 @@ if __name__ == '__main__':
 	body = requests.get(url, headers=headers)  # 完成假访问
 	courses = json.loads(body.text)
 
-	global f, sheet1, row, classTimejson, errors
-	f = xlwt.Workbook()
-	sheet1 = f.add_sheet(u'sheet1', cell_overwrite_ok=True)  # 创建Excel
-	row0 = [u'className', u'startWeek', u'endWeek', u'weekday', u'week', u'classTime', u'classroom']
-	row = 0
-
-	for i in range(0, len(row0)):  # 第一行
-		sheet1.write(0, i, row0[i])
+	global classTimejson, errors, classInfoArray
+	
+	classInfoArray = []
 
 	with open(sys.path[0] + '/conf_classTime.json', 'r', encoding='UTF-8') as jsonfile:
 		classTimejson = json.load(jsonfile)
@@ -122,7 +114,7 @@ if __name__ == '__main__':
 		if(lasting == 1):
 			print('已获取课程 ' + courseName + ' 导师名: ' + instructorName + ' 与课程时间地点')
 		
-		printExcel(courseName, instructorName, courseDetails)  # 获取信息填充Excel
+		printJson(courseName, instructorName, courseDetails)  # 获取信息填充Json
 		
 		if(lasting == body.text.count("\"id\":\"" + str(courseID) + "\"")):
 			print('已储存课程信息\n')
@@ -130,4 +122,11 @@ if __name__ == '__main__':
 		i += 1
 		lastID = courseID
 
-	f.save('classInfo.xls')
+	map = {}
+	map['classInfo'] = classInfoArray
+	
+	with open(sys.path[0] + '/conf_classInfo.json', 'w', encoding = 'gb2312') as f:
+		f.write(json.dumps(map, ensure_ascii = False))
+		f.close()
+	
+	print('已导出json\n')
