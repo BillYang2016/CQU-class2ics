@@ -32,10 +32,12 @@ ics 同时可以导入至 windows 日历以外的系统日历软件，包括但�
 如果您是重庆大学本校学生，请按照以下步骤进行使用：
 1. 登录`http://my.cqu.edu.cn/`
 2. 进入选课管理界面
-3. 在 `Network` 中选择`status`项，并将`Authorization`与`Cookie`填入`crawller.py`
-4. 运行`crawller.py`
-5. 运行`excelReader.py`
-6. 运行`main.py`
+3. 切换至 `Network` 栏，刷新页面
+4. 选择`register`栏，并将底部`Headers`中`Authorization`与`Cookie`填入`crawller.py`
+5. 将学号填入`crawller.py`
+6. 运行`crawller.py`
+7. 运行`excelReader.py`
+8. 运行`main.py`
 
 如果您不是重庆大学学生，请手动创建 Excel 文件，并执行 5、6 步（详情请见参考项目）
 

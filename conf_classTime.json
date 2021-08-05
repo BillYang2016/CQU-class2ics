@@ -1,52 +1,57 @@
 {
   "classTime": [
     {
-        "name":"1-2小节",
+        "name":"1-2",
         "startTime":"0830",
         "endTime":"1010"
     },
     {
-        "name":"3-4小节",
+        "name":"3-4",
         "startTime":"1030",
         "endTime":"1210"
     },
     {
-        "name":"6-7小节",
+        "name":"1-4",
+        "startTime":"0830",
+        "endTime":"1210"
+    },
+    {
+        "name":"6-7",
         "startTime":"1425",
         "endTime":"1605"
     },
     {
-        "name":"8-9小节",
+        "name":"8-9",
         "startTime":"1625",
         "endTime":"1805"
     },
     {
-        "name":"6-9小节",
+        "name":"6-9",
         "startTime":"1425",
         "endTime":"1805"
     },
     {
-        "name":"10-11小节",
+        "name":"10-11",
         "startTime":"1900",
         "endTime":"2040"
     },
     {
-        "name":"10-12小节",
+        "name":"10-12",
         "startTime":"1900",
         "endTime":"2135"
     },
     {
-        "name":"10-13小节",
+        "name":"10-13",
         "startTime":"1900",
         "endTime":"2230"
     },
     {
-        "name":"5-8小节",
+        "name":"5-8",
         "startTime":"1330",
         "endTime":"1710"
     },
     {
-        "name":"9-12小节",
+        "name":"9-12",
         "startTime":"1720",
         "endTime":"2135"
     }
