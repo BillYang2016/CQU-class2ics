@@ -4,34 +4,79 @@
 import sys
 import requests
 import json
+from Crypto.Cipher import AES
+import base64
+import math
+import random
+import re
 
-stuid = '' # 请填入学号
+stuid = ''  # 请填入学号
+
+data = {
+	'username': '',  # 请输入统一认证号
+	'password': ''  # 请输入统一认证号密码
+}
 
 headers = {
 	'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
 	'Host': 'my.cqu.edu.cn',
-	'Referer': 'http://my.cqu.edu.cn/enroll/CourseStuSelectionList',
+	'Referer': 'http://my.cqu.edu.cn/enroll/cas',
+	'Upgrade-Insecure-Requests': '1',
 	'Accept': 'application/json, text/plain, */*',
 	'Accept-Encoding': 'gzip, deflate',
-	'Connection': 'keep-alive',
-	'Authorization': '',  # 填入 Bearer Token
-	'Cookie': ''  # 填入 Cookie
+	'Connection': 'keep-alive'
 }
 
 
-def getCourseTime(encryptedCourseId):  # 通过课程加密名称获取已选课程信息
-	url = 'http://my.cqu.edu.cn/enroll-api/enrollment/courseDetails/'+encryptedCourseId+'?selectionSource=%E4%B8%BB%E4%BF%AE'
+class AESUtil:
+	__BLOCK_SIZE_16 = BLOCK_SIZE_16 = AES.block_size
 
-	body = requests.get(url, headers=headers)  # 完成假访问
-	courseTable = json.loads(body.text)
+	@staticmethod
+	def encrypt(str, key, iv):
+		cipher = AES.new(key, AES.MODE_CBC, iv)
+		x = AESUtil.__BLOCK_SIZE_16 - (len(str) % AESUtil.__BLOCK_SIZE_16)
+		if x != 0:
+			str = str + chr(x)*x
+		str = str.encode()
+		msg = cipher.encrypt(str)
+		# msg = base64.urlsafe_b64encode(msg).replace('=', '')
+		msg = base64.b64encode(msg)
+		return msg
 
-	classes = courseTable['selectCourseListVOs'][0]['selectCourseVOList']
-	
+	@staticmethod
+	def decrypt(enStr, key, iv):
+		cipher = AES.new(key, AES.MODE_CBC, iv)
+		# enStr += (len(enStr) % 4)*"="
+		# decryptByts = base64.urlsafe_b64decode(enStr)
+		decryptByts = base64.b64decode(enStr)
+		msg = cipher.decrypt(decryptByts)
+		paddingLen = ord(msg[len(msg)-1])
+		return msg[0:-paddingLen]
+
+
+chars = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678"
+charsLen = len(chars)
+
+
+def randomString(len):
+	retStr = ''
 	i = 0
-	while(i < len(classes)):
-		if classes[i]['selectedFlag'] is True:  # 找到选课
-			return classes[i]
+	while(i < len):
+		index = int(math.floor(random.random()*charsLen))
+		retStr += chars[index]
 		i += 1
+	return retStr
+
+
+def getAesString(data, key, iv):
+	key = key.encode()
+	iv = iv.encode()
+	return AESUtil.encrypt(data, key, iv)
+
+
+def encryptAes(data, aesKey):
+	encrypted = getAesString(randomString(64) + data, aesKey, randomString(16))
+	return encrypted
 
 
 def printJson(courseName, instructorName, courseDetails):
@@ -69,7 +114,7 @@ def printJson(courseName, instructorName, courseDetails):
 		timeMap['endWeek'] = int(endWeek)
 
 		classMap = {}
-		classMap['className'] =  courseName + ' ' + instructorName  # 课程名 + 导师名
+		classMap['className'] = courseName + ' ' + instructorName  # 课程名 + 导师名
 		classMap['week'] = timeMap  # 开始结束周
 		classMap['weekday'] = weekday  # 周几
 		classMap['classTime'] = classTime  # 上课时间
@@ -81,11 +126,96 @@ def printJson(courseName, instructorName, courseDetails):
 		i += 1
 
 
+def getSubUtilSimple(soap, regx):
+	matchObj = re.findall(regx, soap)
+	return matchObj[0]
+	return ""
+
+
+loginHeaders = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'}
+
+
+def login():
+
+	global session
+
+	loginURL = "http://authserver.cqu.edu.cn/authserver/login"
+	session = requests.session()
+	html = session.get(loginURL).text
+	
+	ltRegex = r'name=\"lt\" value=\"(.*)\"/>'
+	executionRegex = r'name=\"execution\" value=\"(.*)\"/>'
+	keyRegex = r'pwdDefaultEncryptSalt = \"(.*)\"'
+	
+	lt = getSubUtilSimple(html, ltRegex)
+	execution = getSubUtilSimple(html, executionRegex)
+	key = getSubUtilSimple(html, keyRegex)
+	
+	data['password'] = encryptAes(data['password'], key).decode('utf-8')
+	data['dllt'] = 'userNamePasswordLogin'
+	data['execution'] = execution
+	data['lt'] = lt
+	data['_eventId'] = 'submit'
+	data['rmShown'] = '1'
+	
+	postResult = session.post(url=loginURL, data=data, headers=loginHeaders)
+	
+	# print(postResult.text)
+	
+	'''
+	res = requests.get(loginURL)
+	
+	cookies = requests.utils.dict_from_cookiejar(res.cookies)  # 转成字典格式
+	
+	print(cookies)
+	
+	cookiesStr = "; ".join([str(x)+"="+str(y) for x,y in cookies.items()])
+	loginHeaders['Cookie'] = cookiesStr
+	headers['Cookie'] = cookiesStr
+	
+	print(cookiesStr)
+	'''
+	
 if __name__ == '__main__':
+	
+	global session
+	
+	login()
+	
+	data = {}
+	data['client_id'] = 'enroll-prod'
+	data['client_secret'] = 'app-a-1234'
+	data['redirect_uri'] = 'http://my.cqu.edu.cn/enroll/token-index'
+	data['grant_type'] = 'authorization_code'
+	
+	'''
+	session.headers = headers
+	
+	cookies_str = ''
+	cookies_str = str(dict([l.split("=", 1) for l in cookies_str.split("; ")]))
+	cookies_dict = json.loads(cookies_str.replace("'","\""))
+	cookies = requests.utils.cookiejar_from_dict(cookies_dict)
+	session.cookies = cookies
+	
+	print(session.headers)
+	print(session.cookies)
+	'''
+	res = session.get('http://my.cqu.edu.cn/authserver/oauth/authorize?client_id=enroll-prod&response_type=code&scope=all&state=&redirect_uri=http://my.cqu.edu.cn/enroll/token-index')
+	print(res.status_code)
+	print(res.url)
+	print(res.headers)
+	print(res.text)
+	
+	
+	res = session.get(url = 'http://my.cqu.edu.cn/enroll/token-index', data=data, headers=loginHeaders)
+	print(res.text)
+
 	url = 'http://my.cqu.edu.cn/api/enrollment/timetable/student/' + stuid
 
-	body = requests.get(url, headers=headers)  # 完成假访问
+	body = session.get(url, data=data, headers=headers)  # 完成假访问
 	courses = json.loads(body.text)
+	
+	print(body.text)
 
 	global classTimejson, errors, classInfoArray
 	
