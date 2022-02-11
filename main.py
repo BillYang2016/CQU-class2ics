@@ -56,12 +56,12 @@ def icsCreateAndSave():
 		for date in classInfo["date"]:
 			eventString = eventString+"BEGIN:VEVENT\nCREATED:"+classInfo["CREATED"]
 			eventString = eventString+"\nUID:"+classInfo["UID"][index]
-			endTimenew = str(int(endTime)+100)
+			endTimenew = endTime
 			if (len(endTimenew) < 4):
 				endTimenew = "0" + endTimenew
 			eventString = eventString+"\nDTEND;TZID=Asia/Shanghai:"+date+"T"+endTimenew
 			eventString = eventString+"00\nTRANSP:OPAQUE\nX-APPLE-TRAVEL-ADVISORY-BEHAVIOR:AUTOMATIC\nSUMMARY:"+className
-			startTimenew = str(int(startTime)+100)
+			startTimenew = startTime
 			if (len(startTimenew) < 4):
 				startTimenew = "0" + startTimenew
 			eventString = eventString+"\nDTSTART;TZID=Asia/Shanghai:"+date+"T"+startTimenew+"00"

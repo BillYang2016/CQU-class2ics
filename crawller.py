@@ -15,7 +15,7 @@ headers = {
 	'Accept-Encoding': 'gzip, deflate',
 	'Connection': 'keep-alive',
 	'Authorization': '',  # 填入 Bearer Token
-	'Cookie': ''  # 填入 Cookie
+    'Cookie': ''  # 填入 Cookie
 }
 
 
@@ -101,28 +101,28 @@ if __name__ == '__main__':
 	i = 0
 	lasting = 1
 	lastID = 0
-	while(i < len(courses['data'])):
+	while i < len(courses['data']):
 		courseDetails = courses['data'][i]
 		courseName = courseDetails['courseName']
 		instructorName = courseDetails['classTimetableInstrVOList'][0]['instructorName']
 		courseID = courseDetails['id']
 		originName = courseName
 		
-		if(courseDetails['classType'] != '理论'):
+		if courseDetails['classType'] != '理论':
 			courseName = courseName + courseDetails['classType']
 		
-		if(lastID == courseID):
+		if lastID == courseID:
 			lasting += 1
 		else:
 			lasting = 1
 		
-		if(lasting == 1):
+		if lasting == 1:
 			print('已获取课程 ' + originName + ' 导师名: ' + instructorName + ' 与课程时间地点')
 		
 		status = printJson(courseName, instructorName, courseDetails) # 获取信息填充Json
 		
-		if(lasting == body.text.count("\"id\":\"" + str(courseID) + "\"")):
-			if(status is True):
+		if lasting == body.text.count("\"id\":\"" + str(courseID) + "\""):
+			if status is True:
 				print('已储存课程信息\n')
 			else:
 				print('课程信息不全，已跳过\n')
