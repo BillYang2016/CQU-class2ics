@@ -15,7 +15,7 @@ headers = {
 	'Accept-Encoding': 'gzip, deflate',
 	'Connection': 'keep-alive',
 	'Authorization': '',  # 填入 Bearer Token
-    'Cookie': ''  # 填入 Cookie
+	'Cookie': ''  # 填入 Cookie
 }
 
 
