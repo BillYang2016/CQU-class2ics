@@ -22,7 +22,7 @@ ics 同时可以导入至 windows 日历以外的系统日历软件，包括但�
   
 ## 如何部署
 
-请使用 pip 安装 `request` 与 `json`  
+请使用 pip 安装 `request`
 
 如果运行的时候还缺了什么，请 pip / pip3 上。
 
